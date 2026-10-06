@@ -10,6 +10,12 @@ export GOFLAGS="-mod=mod"
 export GOCACHE="${SRC_DIR}/.gocache"
 export GOPATH="${SRC_DIR}/.gopath"
 
+# Go is not available when cross-compiling (see recipe.yaml); use the
+# pre-generated sources in generated-src/ instead.
+if [[ "${CONDA_BUILD_CROSS_COMPILATION:-}" == "1" ]]; then
+  CMAKE_ARGS="${CMAKE_ARGS} -DDISABLE_GO=ON"
+fi
+
 # ENABLE_DIST_PKG is upstream's packaging mode for installing AWS-LC alongside
 # another OpenSSL implementation: headers land in include/aws-lc/openssl, the
 # libraries are named libcrypto-awslc/libssl-awslc and the command line tools

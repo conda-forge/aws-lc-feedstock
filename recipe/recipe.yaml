@@ -27,7 +27,11 @@ requirements:
     - cmake
     - ninja
     - perl
-    - ${{ compiler('go-nocgo') }}
+    # Only used to regenerate err_data.c; when cross-compiling, `go run` would
+    # build for the target, so fall back to the pre-generated sources instead.
+    - if: build_platform == target_platform
+      then:
+        - ${{ compiler('go-nocgo') }}
 
 tests:
   - script:
