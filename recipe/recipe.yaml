@@ -11,13 +11,10 @@ source:
   url: https://github.com/aws/aws-lc/archive/refs/tags/v${{ version }}.tar.gz
   sha256: d79a5beb1c2f7fd86a17d91eb230ae12da71dc28bedeb775c179863cf279c650
   patches:
-    - allow-dist-pkg-on-macos.patch
+    - allow-dist-pkg-on-macos-and-windows.patch
 
 build:
   number: 0
-  # AWS-LC's CMake build does not support the MSVC generator for assembly.
-  skip: win
-  script: build.sh
 
 requirements:
   build:
@@ -27,6 +24,9 @@ requirements:
     - cmake
     - ninja
     - perl
+    - if: win
+      then:
+        - nasm
     # Only used to regenerate err_data.c; when cross-compiling, `go run` would
     # build for the target, so fall back to the pre-generated sources instead.
     - if: build_platform == target_platform
@@ -37,8 +37,13 @@ tests:
   - script:
       - aws-lc-bssl version
       - aws-lc-openssl version
-      - test -f $PREFIX/include/aws-lc/openssl/ssl.h
-      - test -f $PREFIX/lib/pkgconfig/aws-lc.pc
+      - if: unix
+        then:
+          - test -f $PREFIX/include/aws-lc/openssl/ssl.h
+          - test -f $PREFIX/lib/pkgconfig/aws-lc.pc
+        else:
+          - if not exist %LIBRARY_INC%\aws-lc\openssl\ssl.h exit 1
+          - if not exist %LIBRARY_LIB%\pkgconfig\aws-lc.pc exit 1
       - pkg-config --exists --print-errors aws-lc
     requirements:
       run:
@@ -59,8 +64,14 @@ tests:
       recipe:
         - test_link.c
     script:
-      - ${{ "$CC" }} $CFLAGS $LDFLAGS test_link.c -o test_link $(pkg-config --cflags --libs aws-lc)
-      - ./test_link
+      - if: unix
+        then:
+          - ${{ "$CC" }} $CFLAGS $LDFLAGS test_link.c -o test_link $(pkg-config --cflags --libs aws-lc)
+          - ./test_link
+        else:
+          # BORINGSSL_SHARED_LIBRARY makes the headers use __declspec(dllimport).
+          - cl.exe /nologo /DBORINGSSL_SHARED_LIBRARY /I%LIBRARY_INC%\aws-lc test_link.c /Fe:test_link.exe /link /LIBPATH:%LIBRARY_LIB% ssl-awslc.lib crypto-awslc.lib
+          - test_link.exe
     requirements:
       build:
         - ${{ compiler('c') }}

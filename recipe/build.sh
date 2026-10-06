@@ -21,7 +21,7 @@ fi
 # libraries are named libcrypto-awslc/libssl-awslc and the command line tools
 # are prefixed with aws-lc-. Upstream restricts it to Linux, but everything it
 # turns on that is Linux-specific (ELF symbol versioning) is independently
-# gated on non-Apple, so it works on macOS as well.
+# gated on non-Apple UNIX, so it works on macOS and Windows as well.
 cmake -GNinja -B build -S . \
   ${CMAKE_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
