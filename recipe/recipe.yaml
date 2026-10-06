@@ -31,7 +31,8 @@ requirements:
     - if: win and x86_64
       then:
         - nasm
-    # AWS-LC's Windows/ARM64 assembly uses GNU syntax and needs clang-cl.
+    # AWS-LC's Windows/ARM64 assembly uses GNU syntax and needs clang-cl,
+    # which build.bat then also uses for C and C++.
     - if: win and arm64
       then:
         - clang
