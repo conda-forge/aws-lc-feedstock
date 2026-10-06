@@ -14,9 +14,13 @@ source:
     - allow-dist-pkg-on-macos-and-windows.patch
 
 build:
-  number: 0
+  number: 1
 
 requirements:
+  # Upstream keeps the SONAME at .so.1 across releases but only guarantees ABI
+  # stability on LTS branches; every mainline release bumps the minor version.
+  run_exports:
+    - ${{ pin_subpackage("aws-lc", upper_bound="x.x") }}
   build:
     - ${{ compiler('c') }}
     - ${{ stdlib('c') }}
