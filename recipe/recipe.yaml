@@ -23,10 +23,19 @@ requirements:
     - ${{ compiler('cxx') }}
     - cmake
     - ninja
-    - perl
-    - if: win
+    # perl is not available on win-arm64; build.bat falls back to the
+    # pre-generated assembly in generated-src/ there.
+    - if: not (win and arm64)
+      then:
+        - perl
+    - if: win and x86_64
       then:
         - nasm
+    # AWS-LC's Windows/ARM64 assembly uses GNU syntax and needs clang-cl,
+    # which build.bat then also uses for C and C++.
+    - if: win and arm64
+      then:
+        - clang
     # Only used to regenerate err_data.c; when cross-compiling, `go run` would
     # build for the target, so fall back to the pre-generated sources instead.
     - if: build_platform == target_platform
