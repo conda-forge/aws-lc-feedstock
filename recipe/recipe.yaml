@@ -37,13 +37,6 @@ tests:
   - script:
       - aws-lc-bssl version
       - aws-lc-openssl version
-      - if: unix
-        then:
-          - test -f $PREFIX/include/aws-lc/openssl/ssl.h
-          - test -f $PREFIX/lib/pkgconfig/aws-lc.pc
-        else:
-          - if not exist %LIBRARY_INC%\aws-lc\openssl\ssl.h exit 1
-          - if not exist %LIBRARY_LIB%\pkgconfig\aws-lc.pc exit 1
       - pkg-config --exists --print-errors aws-lc
     requirements:
       run:
@@ -58,6 +51,10 @@ tests:
       lib:
         - crypto-awslc
         - ssl-awslc
+      files:
+        - if: unix
+          then: lib/pkgconfig/aws-lc.pc
+          else: Library/lib/pkgconfig/aws-lc.pc
   # Compile and link a small program against the installed library to verify
   # the headers, pkg-config metadata and shared libraries are all consistent.
   - files:
