@@ -1,7 +1,7 @@
 schema_version: 1
 
 context:
-  version: "5.5.0"
+  version: "5.11.0"
 
 package:
   name: aws-lc
@@ -9,7 +9,7 @@ package:
 
 source:
   url: https://github.com/aws/aws-lc/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: d79a5beb1c2f7fd86a17d91eb230ae12da71dc28bedeb775c179863cf279c650
+  sha256: 8cb24c6e6be1fa7ff05075c4560ca8b537a7ef48f9e6f465af4ea455794d74f4
   patches:
     - allow-dist-pkg-on-macos-and-windows.patch
 
