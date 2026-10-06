@@ -12,11 +12,12 @@ set "GOPATH=%SRC_DIR%\.gopath"
 :: crypto-awslc.dll / ssl-awslc.dll, headers in include\aws-lc\openssl and
 :: aws-lc-bssl.exe / aws-lc-openssl.exe, so we do not clash with `openssl`.
 set "EXTRA_CMAKE_ARGS="
+:: No perl on win-arm64, use the pre-generated assembly instead. MSVC cannot
+:: assemble the GNU-style .S files, so use clang-cl. It has to be used for C
+:: and C++ too: mixing cl.exe with a clang-cl assembler makes CMake fall back
+:: to GNU-style link flags (-lws2_32, lib*.dll.a) for the whole project.
+:: Keep these comments outside the if block, cmd would parse their parentheses.
 if "%target_platform%"=="win-arm64" (
-  :: No perl on win-arm64, use the pre-generated assembly instead. MSVC cannot
-  :: assemble the GNU-style .S files, so use clang-cl. It has to be used for C
-  :: and C++ too: mixing cl.exe with a clang-cl assembler makes CMake fall back
-  :: to GNU-style link flags (-lws2_32, lib*.dll.a) for the whole project.
   set "EXTRA_CMAKE_ARGS=-DDISABLE_PERL=ON -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_ASM_COMPILER=clang-cl"
 )
 
