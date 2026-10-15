@@ -32,11 +32,16 @@ cmake -GNinja -B build -S . ^
   -DBUILD_LIBSSL=ON ^
   -DBUILD_TOOL=ON ^
   -DENABLE_DIST_PKG=ON ^
-  -DENABLE_DIST_PKG_OPENSSL_SHIM=OFF
+  -DENABLE_DIST_PKG_OPENSSL_SHIM=OFF ^
+  -DGENERATE_RUST_BINDINGS=ON
 if errorlevel 1 exit 1
 
 cmake --build build --config Release
 if errorlevel 1 exit 1
 
 cmake --install build --config Release
+if errorlevel 1 exit 1
+
+:: Only bindgen's input; the installed bindings are what consumers need.
+del "%LIBRARY_INC%\rust_wrapper.h"
 if errorlevel 1 exit 1

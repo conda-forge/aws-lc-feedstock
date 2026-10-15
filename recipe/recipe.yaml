@@ -14,7 +14,7 @@ source:
     - allow-dist-pkg-on-macos-and-windows.patch
 
 build:
-  number: 1
+  number: 2
 
 requirements:
   # Upstream keeps the SONAME at .so.1 across releases but only guarantees ABI
@@ -27,6 +27,11 @@ requirements:
     - ${{ compiler('cxx') }}
     - cmake
     - ninja
+    # GENERATE_RUST_BINDINGS runs bindgen so that aws-lc-sys can link this
+    # package instead of its bundled copy. bindgen needs clang's resource
+    # headers (stddef.h, ...) and a clang executable to find system headers.
+    - bindgen-cli
+    - clang
     # perl is not available on win-arm64; build.bat falls back to the
     # pre-generated assembly in generated-src/ there.
     - if: not (win and arm64)
@@ -35,11 +40,6 @@ requirements:
     - if: win and x86_64
       then:
         - nasm
-    # AWS-LC's Windows/ARM64 assembly uses GNU syntax and needs clang-cl,
-    # which build.bat then also uses for C and C++.
-    - if: win and arm64
-      then:
-        - clang
     # Only used to regenerate err_data.c; when cross-compiling, `go run` would
     # build for the target, so fall back to the pre-generated sources instead.
     - if: build_platform == target_platform
@@ -66,8 +66,18 @@ tests:
         - ssl-awslc
       files:
         - if: unix
-          then: lib/pkgconfig/aws-lc.pc
-          else: Library/lib/pkgconfig/aws-lc.pc
+          then:
+            - lib/pkgconfig/aws-lc.pc
+            - share/rust/aws_lc_bindings.rs
+          else:
+            - Library/lib/pkgconfig/aws-lc.pc
+            - Library/share/rust/aws_lc_bindings.rs
+  # The Rust bindings are consumed by aws-lc-sys (AWS_LC_SYS_SYSTEM_BINDINGS)
+  # and must have been generated for this platform, not the build machine.
+  - script:
+      - if: unix
+        then: grep -q "pub fn EVP_aead_aes_128_gcm" $PREFIX/share/rust/aws_lc_bindings.rs
+        else: findstr /C:"pub fn EVP_aead_aes_128_gcm" %LIBRARY_PREFIX%\share\rust\aws_lc_bindings.rs
   # Compile and link a small program against the installed library to verify
   # the headers, pkg-config metadata and shared libraries are all consistent.
   - files:
