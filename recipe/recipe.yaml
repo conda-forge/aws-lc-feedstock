@@ -72,8 +72,6 @@ tests:
           else:
             - Library/lib/pkgconfig/aws-lc.pc
             - Library/share/rust/aws_lc_bindings.rs
-  # The Rust bindings are consumed by aws-lc-sys (AWS_LC_SYS_SYSTEM_BINDINGS)
-  # and must have been generated for this platform, not the build machine.
   - script:
       - if: unix
         then: grep -q "pub fn EVP_aead_aes_128_gcm" $PREFIX/share/rust/aws_lc_bindings.rs
