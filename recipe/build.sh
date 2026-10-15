@@ -16,6 +16,11 @@ if [[ "${CONDA_BUILD_CROSS_COMPILATION:-}" == "1" ]]; then
   CMAKE_ARGS="${CMAKE_ARGS} -DDISABLE_GO=ON"
 fi
 
+# GENERATE_RUST_BINDINGS runs bindgen on the build machine. libclang has no
+# idea about conda's toolchain, so tell it which platform the bindings are
+# for and where that platform's system headers live.
+export BINDGEN_EXTRA_CLANG_ARGS="--target=${HOST} --sysroot=${CONDA_BUILD_SYSROOT}"
+
 # ENABLE_DIST_PKG is upstream's packaging mode for installing AWS-LC alongside
 # another OpenSSL implementation: headers land in include/aws-lc/openssl, the
 # libraries are named libcrypto-awslc/libssl-awslc and the command line tools
@@ -32,7 +37,11 @@ cmake -GNinja -B build -S . \
   -DBUILD_LIBSSL=ON \
   -DBUILD_TOOL=ON \
   -DENABLE_DIST_PKG=ON \
-  -DENABLE_DIST_PKG_OPENSSL_SHIM=OFF
+  -DENABLE_DIST_PKG_OPENSSL_SHIM=OFF \
+  -DGENERATE_RUST_BINDINGS=ON
 
 cmake --build build --config Release
 cmake --install build --config Release
+
+# Only bindgen's input; the installed bindings are what consumers need.
+rm "${PREFIX}/include/rust_wrapper.h"
