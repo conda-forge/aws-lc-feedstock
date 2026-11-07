@@ -14,7 +14,7 @@ source:
     - allow-dist-pkg-on-macos-and-windows.patch
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   # Upstream keeps the SONAME at .so.1 across releases but only guarantees ABI
@@ -53,7 +53,7 @@ tests:
       - pkg-config --exists --print-errors aws-lc
     requirements:
       run:
-        - pkg-config
+        - pkgconf
   - package_contents:
       bin:
         - aws-lc-bssl
@@ -94,7 +94,7 @@ tests:
       build:
         - ${{ compiler('c') }}
         - ${{ stdlib('c') }}
-        - pkg-config
+        - pkgconf
 
 about:
   homepage: https://github.com/aws/aws-lc
