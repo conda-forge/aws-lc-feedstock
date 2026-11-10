@@ -1,7 +1,7 @@
 schema_version: 1
 
 context:
-  version: "5.13.0"
+  version: "5.14.0"
 
 package:
   name: aws-lc
@@ -9,12 +9,12 @@ package:
 
 source:
   url: https://github.com/aws/aws-lc/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 36169f60b2fd0619d919ac2e76da6b7912262256b93908f5c702a4c1b6c9b110
+  sha256: 8895a9d2434e875e009e652a1015f9c2c275261634c7132253ca5aa60d266888
   patches:
     - allow-dist-pkg-on-macos-and-windows.patch
 
 build:
-  number: 1
+  number: 0
 
 requirements:
   # Upstream keeps the SONAME at .so.1 across releases but only guarantees ABI
